@@ -1,0 +1,42 @@
+/* src/components/Sidebar.css */
+
+/* Contenedor principal del Sidebar */
+.sidebar-container {
+    width: 250px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    /* Forzamos el fondo oscuro siempre */
+    background-color: #212529; 
+}
+
+/* Encabezado con el logo/nombre de la app */
+.sidebar-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* Estilos para los enlaces de navegación */
+.sidebar-container .nav-link {
+    /* Forzamos un color de texto claro para los enlaces */
+    color: #adb5bd; /* Un gris claro para los enlaces inactivos */
+    margin-bottom: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* Estilo cuando el cursor pasa por encima */
+.sidebar-container .nav-link:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #ffffff; /* Blanco al pasar el cursor */
+}
+
+/* Estilo para el enlace ACTIVO (la página actual) */
+.sidebar-container .nav-link.active {
+    background-color: var(--primary-green);
+    color: #ffffff; /* Blanco para el enlace activo */
+    font-weight: bold;
+}

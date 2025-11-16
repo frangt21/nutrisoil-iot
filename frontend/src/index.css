@@ -1,0 +1,62 @@
+/* ==========================================================================
+   1. CONFIGURACIÓN DE VARIABLES GLOBALES (TEMA CLARO ÚNICO)
+   ========================================================================== */
+
+:root {
+  /* Colores primarios */
+  --primary-green: #28a745;
+  --primary-green-darker: #218838;
+  
+  /* Colores del Tema Claro */
+  --bg-color: #f8f9fa;        /* Fondo principal (blanco grisáceo) */
+  --card-bg-color: #ffffff;    /* Fondo de tarjetas y elementos */
+  --text-color: #212529;      /* Color de texto principal (negro) */
+  --text-muted-color: #6c757d;  /* Color de texto secundario (gris) */
+  --border-color: #dee2e6;   /* Color de bordes */
+}
+
+/* ==========================================================================
+   2. ESTILOS GLOBALES Y DE LAYOUT
+   ========================================================================== */
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Wrapper del contenido principal */
+.content-wrapper {
+  background-color: var(--bg-color);
+  min-height: 100vh;
+}
+
+/* Header superior */
+.main-header {
+  background-color: var(--card-bg-color) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* ==========================================================================
+   3. ESTILOS DE COMPONENTES DE BOOTSTRAP (MODO CLARO)
+   ========================================================================== */
+
+/* Usamos .card, .modal-content, etc. para aplicar estilos comunes */
+.card, .modal-content, .accordion-item {
+  background-color: var(--card-bg-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Botones */
+.btn-success {
+  background-color: var(--primary-green) !important;
+  border-color: var(--primary-green) !important;
+}
+.btn-success:hover {
+  background-color: var(--primary-green-darker) !important;
+  border-color: var(--primary-green-darker) !important;
+}

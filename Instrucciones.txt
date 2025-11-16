@@ -1,0 +1,53 @@
+-- Instrucciones --
+1. Clonar Repositorio:
+git clone link_del_repo
+
+2. Configurar Frontend:
+
+cd nutrisoil-iot/frontend
+npm install
+
+3. Configurar Backend:
+
+cd nutrisoil-iot/backend
+
+a. Crear entorno virtual de python:
+
+python -m venv venv
+
+b. Activar el entorno:
+Windows: .\venv\Scripts\activate O en linux: source venv/bin/activate
+
+c. Instalar lo necesario:
+pip install -r requirements.txt
+
+4. Configurar BD
+Crea un archivo ".env" en la carpeta backend/, se debe ver así: nutrisoil-iot/backend/.env
+
+Ejemplo .env:
+
+# Archivo: backend/.env
+
+DEBUG=True
+SECRET_KEY =la_secret_key_django
+# Puedes crear una secret key con el comando: python python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+
+#  BD
+
+DB_NAME=postgres
+DB_USER=postgres.tu_usuario
+DB_PASSWORD=tu_contraseña
+DB_HOST=tu_host.com
+DB_PORT=tu_puerto
+
+5. Correr el proyecto
+Debes abrir dos terminales al mismo tiempo:
+cd backend
+python manage.py runserver
+
+backend en localhost:8000
+
+cd frontend
+npm star
+
+frontend en localhost:3000
