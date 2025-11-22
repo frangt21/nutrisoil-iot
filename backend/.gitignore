@@ -1,3 +1,4 @@
+# Python / Django
 venv/
 __pycache__/
 *.pyc
@@ -6,4 +7,18 @@ __pycache__/
 .env
 db.sqlite3
 *.log
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Django Media & Static (Collected)
+media/
+staticfiles/
+
+# NOTA: No ignoramos 'migrations/' porque es importante versionar los cambios de esquema.
+# Solo ignoramos el cache dentro de ellas si existiera.

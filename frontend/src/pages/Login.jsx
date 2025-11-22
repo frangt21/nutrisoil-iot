@@ -1,23 +1,38 @@
-// Pantalla Login
+// Pantalla Login con Supabase Auth
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Form, Button, Card } from 'react-bootstrap';
-import { login } from '../services/api';
+import { Container, Form, Button, Card, Alert } from 'react-bootstrap';
+import { useAuth } from '../context/AuthContext';
 
 function Login() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      const response = await login(username, password);
-      localStorage.setItem('token', response.token);
-      navigate('/dashboard');
-    } catch (error) {
-      alert('Error de login: ' + error.message);
+      const result = await signIn(email, password);
+      if (result.error) {
+        setError(result.error.message || 'Error al iniciar sesión');
+        setLoading(false);
+        return;
+      }
+      
+      // Si el login fue exitoso, el AuthContext ya actualizó el estado
+      // Navegar al dashboard (el loading se resetea al navegar)
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Error al iniciar sesión');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -26,14 +41,17 @@ function Login() {
       <Card style={{ width: '400px'}}>
         <Card.Body>
           <h2 className="text-center mb-4" style={{ color: '#28a745' }}>🌱 NutriSoil IoT</h2>
+          {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
-              <Form.Label>Usuario</Form.Label>
+              <Form.Label>Email</Form.Label>
               <Form.Control 
-                type="text" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Ingresa tu usuario"
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Ingresa tu email"
+                required
+                disabled={loading}
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -43,14 +61,16 @@ function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Ingresa tu contraseña"
+                required
+                disabled={loading}
               />
             </Form.Group>
-            <Button variant="success" type="submit" className="w-100">
-              Iniciar Sesión
+            <Button variant="success" type="submit" className="w-100" disabled={loading}>
+              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
           </Form>
           <p className="text-center mt-3 text-muted">
-            Usuario demo: admin | Contraseña: admin
+            Usa tu email y contraseña de Supabase
           </p>
         </Card.Body>
       </Card>

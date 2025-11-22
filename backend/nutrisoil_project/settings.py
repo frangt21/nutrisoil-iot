@@ -39,6 +39,7 @@ INSTALLED_APPS = [
      # Apps de terceros
     'rest_framework',
     'corsheaders',
+    'django_filters',
     
     # Apps propias
     'api',
@@ -80,7 +81,21 @@ WSGI_APPLICATION = 'nutrisoil_project.wsgi.application'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React en desarrollo
     "http://localhost:5173",  # Si usan Vite
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
 ]
+
+CORS_ALLOW_HEADERS = [
+    "authorization",
+    "content-type",
+    "accept",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+CORS_ALLOW_CREDENTIALS = True
+
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -91,6 +106,12 @@ load_dotenv()
 # Usar variables de entorno
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
+SUPABASE_JWT_SECRET = os.getenv('SUPABASE_JWT_SECRET')
+
+# Configuración de Supabase
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
+
 
 DATABASES = {
     'default': {
@@ -110,6 +131,18 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
+    # --- ¡AÑADE ESTO! ---
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # Le decimos a DRF que use nuestra clase para TODAS las vistas
+        'api.authentication.SupabaseAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        # Exigimos que todas las vistas requieran autenticación por defecto
+         'rest_framework.permissions.IsAuthenticated',
+    ]
 }
 
 

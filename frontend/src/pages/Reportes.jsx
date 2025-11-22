@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Container, Card, Button, Row, Col, Form, Spinner, Table } from 'react-bootstrap';
-import { getMediciones, getPredios } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { Container, Card, Button, Row, Col, Form, Spinner, Table, Accordion } from 'react-bootstrap';
+import { getMediciones, getPredios, getRecomendaciones } from '../services/api';
+import { showToast } from '../utils/toast'; // Importar showToast
 
 function Reportes() {
     // --- ESTADOS ---
     const [loading, setLoading] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
     const [allPredios, setAllPredios] = useState([]);
+    const [recomendaciones, setRecomendaciones] = useState([]);
     const [selectedZonas, setSelectedZonas] = useState([]);
     const [reportFilters, setReportFilters] = useState({
         predioIds: [],
@@ -14,6 +17,7 @@ function Reportes() {
         fechaFin: '',
     });
     const [reportData, setReportData] = useState(null);
+    const navigate = useNavigate();
 
     // --- LÓGICA DE DATOS ---
     useEffect(() => {
@@ -22,8 +26,11 @@ function Reportes() {
             try {
                 const prediosData = await getPredios();
                 setAllPredios(prediosData);
+                const recomendacionesData = await getRecomendaciones();
+                setRecomendaciones(recomendacionesData);
             } catch (error) {
-                console.error("Error al cargar predios:", error);
+                console.error("Error al cargar datos iniciales:", error);
+                showToast("Error al cargar datos iniciales.", 'error');
             } finally {
                 setLoading(false);
             }
@@ -39,6 +46,17 @@ function Reportes() {
         }
         return allPredios.filter(p => selectedZonas.includes(p.zona));
     }, [allPredios, selectedZonas]);
+
+    const recomendacionesPorPredio = useMemo(() => {
+        return recomendaciones.reduce((acc, rec) => {
+            const predioId = rec.predio;
+            if (!acc[predioId]) {
+                acc[predioId] = [];
+            }
+            acc[predioId].push(rec);
+            return acc;
+        }, {});
+    }, [recomendaciones]);
 
     // --- MANEJADORES DE EVENTOS ---
     const handleZonaChange = (e) => {
@@ -104,17 +122,17 @@ function Reportes() {
                 },
                 details: filteredMediciones
             });
-
+            showToast("Reporte generado correctamente.", 'success');
         } catch (error) {
             console.error("Error generando el reporte:", error);
-            alert("No se pudo generar el reporte.");
+            showToast("No se pudo generar el reporte.", 'error');
         } finally {
             setIsGenerating(false);
         }
     };
 
     const handleExportPDF = () => {
-        alert('Función de exportar PDF en desarrollo.\nEn la versión final se generará un PDF completo con los datos de este reporte.');
+        showToast('Función de exportar PDF en desarrollo.\nEn la versión final se generará un PDF completo con los datos de este reporte.', 'info');
     };
 
     // --- RENDERIZADO ---
@@ -124,94 +142,91 @@ function Reportes() {
 
     return (
         <Container>
-            {!reportData && (
-                <Card>
-                    <Card.Header as="h5">Generador de Reportes</Card.Header>
-                    <Card.Body>
-                        <Card.Text>Selecciona los parámetros para crear un nuevo reporte de recomendaciones.</Card.Text>
-                        <Row>
-                            <Col md={4}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>1. Selecciona la(s) Zona(s)</Form.Label>
-                                    <Form.Select multiple onChange={handleZonaChange} style={{ height: '150px' }}>
-                                        {zonasUnicas.map(zona => <option key={zona} value={zona}>{zona}</option>)}
-                                    </Form.Select>
-                                </Form.Group>
-                            </Col>
-                            <Col md={4}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>2. Selecciona el/los Predio(s)</Form.Label>
-                                    <Form.Select multiple name="predioIds" value={reportFilters.predioIds} onChange={handleFilterChange} style={{ height: '150px' }}>
-                                        {prediosFiltradosPorZona.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                                    </Form.Select>
-                                    <Form.Text>Mantén presionada la tecla Ctrl (o Cmd en Mac) para seleccionar varios.</Form.Text>
-                                </Form.Group>
-                            </Col>
-                            <Col md={4}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>3. Selecciona el Periodo</Form.Label>
-                                    <Form.Control type="date" name="fechaInicio" value={reportFilters.fechaInicio} onChange={handleFilterChange} className="mb-2"/>
-                                    <Form.Control type="date" name="fechaFin" value={reportFilters.fechaFin} onChange={handleFilterChange} />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Button variant="success" onClick={handleGenerateReport} disabled={isGenerating}>
-                            {isGenerating ? <><Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> Generando...</> : 'Generar Reporte'}
-                        </Button>
-                    </Card.Body>
-                </Card>
-            )}
-
-            {reportData && (
-                <div>
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                        <h2>Resultado del Reporte</h2>
-                        <div>
-                            <Button variant="secondary" className="me-2" onClick={() => setReportData(null)}>Crear Nuevo Reporte</Button>
-                            <Button variant="success" onClick={handleExportPDF}>Exportar a PDF</Button>
-                        </div>
-                    </div>
-
-                    <Row className="mb-4">
-                        <Col md={2} className="mb-3"><Card body className="text-center"><h6>Total Análisis</h6><h3 className="text-success">{reportData.summary.totalAnalisis}</h3></Card></Col>
-                        <Col md={2} className="mb-3"><Card body className="text-center"><h6>pH Promedio</h6><h3 className="text-success">{reportData.summary.avgPh}</h3></Card></Col>
-                        <Col md={2} className="mb-3"><Card body className="text-center"><h6>N Promedio</h6><h3 className="text-success">{reportData.summary.avgN} ppm</h3></Card></Col>
-                        <Col md={2} className="mb-3"><Card body className="text-center"><h6>P Promedio</h6><h3 className="text-success">{reportData.summary.avgP} ppm</h3></Card></Col>
-                        <Col md={2} className="mb-3"><Card body className="text-center"><h6>K Promedio</h6><h3 className="text-success">{reportData.summary.avgK} cmol/kg</h3></Card></Col>
-                        <Col md={2} className="mb-3"><Card body className="text-center"><h6>Periodo</h6><small>{reportData.summary.periodo}</small></Card></Col>
+            <Card className="mb-4">
+                <Card.Header as="h5">Generador de Reportes</Card.Header>
+                <Card.Body>
+                    <Card.Text>Selecciona los parámetros para crear un nuevo reporte de recomendaciones.</Card.Text>
+                    <Row>
+                        <Col md={4}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>1. Selecciona la(s) Zona(s)</Form.Label>
+                                <Form.Select multiple onChange={handleZonaChange} style={{ height: '150px' }}>
+                                    {zonasUnicas.map(zona => <option key={zona} value={zona}>{zona}</option>)}
+                                </Form.Select>
+                            </Form.Group>
+                        </Col>
+                        <Col md={4}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>2. Selecciona el/los Predio(s)</Form.Label>
+                                <Form.Select multiple name="predioIds" value={reportFilters.predioIds} onChange={handleFilterChange} style={{ height: '150px' }}>
+                                    {prediosFiltradosPorZona.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                                </Form.Select>
+                                <Form.Text>Mantén presionada la tecla Ctrl (o Cmd en Mac) para seleccionar varios.</Form.Text>
+                            </Form.Group>
+                        </Col>
+                        <Col md={4}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>3. Selecciona el Periodo</Form.Label>
+                                <Form.Control type="date" name="fechaInicio" value={reportFilters.fechaInicio} onChange={handleFilterChange} className="mb-2"/>
+                                <Form.Control type="date" name="fechaFin" value={reportFilters.fechaFin} onChange={handleFilterChange} />
+                            </Form.Group>
+                        </Col>
                     </Row>
+                    <Button variant="success" onClick={handleGenerateReport} disabled={isGenerating}>
+                        {isGenerating ? <><Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> Generando...</> : 'Generar Reporte'}
+                    </Button>
+                </Card.Body>
+            </Card>
 
-                    <Card>
-                        <Card.Header>Historial de Recomendaciones</Card.Header>
-                        <Card.Body>
-                             <Table striped bordered hover responsive>
-                                <thead>
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th>Predio</th>
-                                        <th>Urea (kg/ha)</th>
-                                        <th>Superfosfato (kg/ha)</th>
-                                        <th>Muriato K (kg/ha)</th>
-                                        <th>Cal (kg/ha)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {reportData.details.length > 0 ? reportData.details.map(m => (
-                                        <tr key={m.id}>
-                                            <td>{new Date(m.fecha).toLocaleDateString('es-CL')}</td>
-                                            <td>{m.predio_nombre}</td>
-                                            <td>{m.recomendacion.urea_kg_ha.toFixed(0)}</td>
-                                            <td>{m.recomendacion.superfosfato_kg_ha.toFixed(0)}</td>
-                                            <td>{m.recomendacion.muriato_potasio_kg_ha.toFixed(0)}</td>
-                                            <td>{m.recomendacion.cal_kg_ha.toFixed(0)}</td>
-                                        </tr>
-                                    )) : <tr><td colSpan="6" className="text-center">No hay datos para los filtros seleccionados.</td></tr>}
-                                </tbody>
-                            </Table>
-                        </Card.Body>
-                    </Card>
-                </div>
-            )}
+            <Card>
+                <Card.Header as="h5">Historial de Recomendaciones</Card.Header>
+                <Card.Body>
+                    <Accordion>
+                        {zonasUnicas.map((zona, zonaIndex) => (
+                            <Accordion.Item eventKey={zonaIndex.toString()} key={zonaIndex}>
+                                <Accordion.Header>{zona}</Accordion.Header>
+                                <Accordion.Body>
+                                    <Accordion>
+                                        {allPredios.filter(p => p.zona === zona).map((predio, predioIndex) => (
+                                            <Accordion.Item eventKey={predioIndex.toString()} key={predioIndex}>
+                                                <Accordion.Header>{predio.nombre}</Accordion.Header>
+                                                <Accordion.Body>
+                                                    <Table striped bordered hover responsive>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Fecha de Cálculo</th>
+                                                                <th>Semana de Medición</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {recomendacionesPorPredio[predio.id] ? recomendacionesPorPredio[predio.id].map(rec => (
+                                                                <tr key={rec.id}>
+                                                                    <td>{new Date(rec.fecha_calculo).toLocaleDateString('es-CL')}</td>
+                                                                    <td>{new Date(rec.semana_inicio).toLocaleDateString('es-CL')}</td>
+                                                                    <td>
+                                                                        <Button variant="primary" size="sm" onClick={() => navigate(`/recomendaciones/${rec.id}`)}>
+                                                                            Ver Detalle
+                                                                        </Button>
+                                                                    </td>
+                                                                </tr>
+                                                            )) : (
+                                                                <tr>
+                                                                    <td colSpan="3" className="text-center">No hay recomendaciones para este predio.</td>
+                                                                </tr>
+                                                            )}
+                                                        </tbody>
+                                                    </Table>
+                                                </Accordion.Body>
+                                            </Accordion.Item>
+                                        ))}
+                                    </Accordion>
+                                </Accordion.Body>
+                            </Accordion.Item>
+                        ))}
+                    </Accordion>
+                </Card.Body>
+            </Card>
         </Container>
     );
 }
