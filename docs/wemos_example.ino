@@ -26,7 +26,7 @@ const char* password = "TU_WIFI_PASSWORD";
 const char* serverUrl = "http://192.168.1.100:8000/api/iot/wemos/ingest/";
 
 // Token de seguridad (debe coincidir con el backend)
-const char* deviceToken = "NUTRISOIL_IOT_SECRET_2024";
+const char* deviceToken = "token_super_secreto";
 
 // ID del Predio al que pertenece este dispositivo (debe existir en la BD)
 const int predioId = 1; 

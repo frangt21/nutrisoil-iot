@@ -39,16 +39,28 @@ export const setAuthToken = (token) => {
 
 // Interceptor para agregar el token a todas las peticiones
 axios.interceptors.request.use(
-  (config) => {
+  async (config) => {
     if (USE_MOCK) {
       return config;
     }
-    
-    // Leer el token actual de la variable global
-    if (currentAccessToken) {
-      config.headers.Authorization = `Bearer ${currentAccessToken}`;
+
+    // 1. Intentar usar el token de la variable global
+    let token = currentAccessToken;
+
+    // 2. Si no hay token global, intentar obtenerlo de Supabase (fallback)
+    if (!token) {
+      const { data } = await supabase.auth.getSession();
+      token = data.session?.access_token;
+      if (token) {
+        setAuthToken(token); // Actualizar global
+      }
     }
-    
+
+    // 3. Si tenemos token, agregarlo al header
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     return config;
   },
   (error) => {
@@ -181,7 +193,7 @@ export const getMediciones = async (params = {}) => {
   if (USE_MOCK) {
     await mockDelay();
     let resultado = MOCK_MEDICIONES;
-    
+
     if (params.predio) {
       resultado = resultado.filter(m => m.predio.toString() === params.predio);
     }
@@ -191,21 +203,21 @@ export const getMediciones = async (params = {}) => {
     if (params.fecha_lte) {
       resultado = resultado.filter(m => new Date(m.fecha) <= new Date(params.fecha_lte));
     }
-    
+
     return resultado;
   } else {
     const urlParams = new URLSearchParams();
     for (const key in params) {
-        if (params[key]) {
-            urlParams.append(key, params[key]);
-        }
+      if (params[key]) {
+        urlParams.append(key, params[key]);
+      }
     }
-    
+
     let url = `${BACKEND_URL}/api/mediciones/`;
     if (urlParams.toString()) {
-        url += `?${urlParams.toString()}`;
+      url += `?${urlParams.toString()}`;
     }
-    
+
     const response = await axios.get(url);
     return response.data;
   }

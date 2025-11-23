@@ -11,32 +11,35 @@ def generar_alertas(medicion):
 
     # Rangos para las Alertas
     # pH del Suelo
-    ph = float(medicion.ph)
-    if ph < 5.0 or ph > 7.5:
-        alertas.append({'tipo': 'critico', 'parametro': 'pH', 'mensaje': f'🔴 Crítico: pH ({ph}) fuera de rango (5.0-7.5).'})
-    elif (ph >= 5.0 and ph < 5.5) or (ph > 7.0 and ph <= 7.5):
-        alertas.append({'tipo': 'advertencia', 'parametro': 'pH', 'mensaje': f'🟡 Advertencia: pH ({ph}) en nivel de advertencia (5.0-5.5 o 7.0-7.5).'})
-    else:
-        alertas.append({'tipo': 'optimo', 'parametro': 'pH', 'mensaje': f'🟢 Óptimo: pH ({ph}) dentro del rango (5.5-7.0).'})
+    if medicion.ph is not None:
+        ph = float(medicion.ph)
+        if ph < 5.0 or ph > 7.5:
+            alertas.append({'tipo': 'critico', 'parametro': 'pH', 'mensaje': f'🔴 Crítico: pH ({ph}) fuera de rango (5.0-7.5).'})
+        elif (ph >= 5.0 and ph < 5.5) or (ph > 7.0 and ph <= 7.5):
+            alertas.append({'tipo': 'advertencia', 'parametro': 'pH', 'mensaje': f'🟡 Advertencia: pH ({ph}) en nivel de advertencia (5.0-5.5 o 7.0-7.5).'})
+        else:
+            alertas.append({'tipo': 'optimo', 'parametro': 'pH', 'mensaje': f'🟢 Óptimo: pH ({ph}) dentro del rango (5.5-7.0).'})
 
     # Temperatura del Suelo
-    temp = float(medicion.temperatura)
-    if temp < 5.0 or temp > 35.0:
-        alertas.append({'tipo': 'critico', 'parametro': 'Temperatura', 'mensaje': f'🔴 Crítico: Temperatura ({temp}°C) fuera de rango (5-35°C).'})
-    elif temp >= 15.0 and temp <= 25.0:
-        alertas.append({'tipo': 'optimo', 'parametro': 'Temperatura', 'mensaje': f'🟢 Óptimo: Temperatura ({temp}°C) dentro del rango (15-25°C).'})
-    else:
-        alertas.append({'tipo': 'informativo', 'parametro': 'Temperatura', 'mensaje': f'ℹ️ Nota: Temperatura ({temp}°C) fuera del rango óptimo (15-25°C).'})
+    if medicion.temperatura is not None:
+        temp = float(medicion.temperatura)
+        if temp < 5.0 or temp > 35.0:
+            alertas.append({'tipo': 'critico', 'parametro': 'Temperatura', 'mensaje': f'🔴 Crítico: Temperatura ({temp}°C) fuera de rango (5-35°C).'})
+        elif temp >= 15.0 and temp <= 25.0:
+            alertas.append({'tipo': 'optimo', 'parametro': 'Temperatura', 'mensaje': f'🟢 Óptimo: Temperatura ({temp}°C) dentro del rango (15-25°C).'})
+        else:
+            alertas.append({'tipo': 'informativo', 'parametro': 'Temperatura', 'mensaje': f'ℹ️ Nota: Temperatura ({temp}°C) fuera del rango óptimo (15-25°C).'})
 
 
     # Humedad del Suelo
-    humedad = float(medicion.humedad)
-    if humedad < 20.0 or humedad > 90.0:
-        alertas.append({'tipo': 'critico', 'parametro': 'Humedad', 'mensaje': f'🔴 Crítico: Humedad ({humedad}%) fuera de rango (20-90%).'})
-    elif humedad >= 40.0 and humedad <= 70.0:
-        alertas.append({'tipo': 'optimo', 'parametro': 'Humedad', 'mensaje': f'🟢 Óptimo: Humedad ({humedad}%) dentro del rango (40-70%).'})
-    else:
-        alertas.append({'tipo': 'informativo', 'parametro': 'Humedad', 'mensaje': f'ℹ️ Nota: Humedad ({humedad}%) fuera del rango óptimo (40-70%).'})
+    if medicion.humedad is not None:
+        humedad = float(medicion.humedad)
+        if humedad < 20.0 or humedad > 90.0:
+            alertas.append({'tipo': 'critico', 'parametro': 'Humedad', 'mensaje': f'🔴 Crítico: Humedad ({humedad}%) fuera de rango (20-90%).'})
+        elif humedad >= 40.0 and humedad <= 70.0:
+            alertas.append({'tipo': 'optimo', 'parametro': 'Humedad', 'mensaje': f'🟢 Óptimo: Humedad ({humedad}%) dentro del rango (40-70%).'})
+        else:
+            alertas.append({'tipo': 'informativo', 'parametro': 'Humedad', 'mensaje': f'ℹ️ Nota: Humedad ({humedad}%) fuera del rango óptimo (40-70%).'})
 
 
     # Nitrógeno (N)

@@ -20,17 +20,17 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     setLoading(true);
-    
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       // Actualizar el token en el módulo de API
       setAuthToken(session?.access_token || null);
 
-      if (session?.user) {
+      if (session?.user && session?.access_token) {
         try {
           const profileData = await getProfile();
           setProfile(profileData);
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         setProfile(null);
       }
-      
+
       setLoading(false);
     });
 
@@ -54,7 +54,13 @@ export const AuthProvider = ({ children }) => {
     profile,
     loading,
     isAuthenticated: !!user,
-    signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
+    signIn: async (email, password) => {
+      const result = await supabase.auth.signInWithPassword({ email, password });
+      if (result.data?.session) {
+        setAuthToken(result.data.session.access_token);
+      }
+      return result;
+    },
     signUp: (email, password) => supabase.auth.signUp({ email, password }),
     signOut: async () => {
       const { error } = await supabase.auth.signOut();

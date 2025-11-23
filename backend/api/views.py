@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.db.models import Avg
 from datetime import timedelta, datetime
 from collections import defaultdict
-
+from django.conf import settings
 from .models import Predio, Medicion, Recomendacion
 from .serializers import (
     PredioSerializer, MedicionSerializer, MedicionCreateSerializer,
@@ -307,8 +307,8 @@ def recibir_datos_wemos(request):
     Autenticación simple por token en el header o body.
     """
     # 1. Validación de Seguridad Simple
-    device_token = request.data.get('token') or request.headers.get('X-Device-Token')
-    if device_token != 'NUTRISOIL_IOT_SECRET_2024': # Hardcoded por ahora para prototipo
+    device_token = request.META.get('HTTP_X_API_KEY') 
+    if device_token != settings.WEMOS_API_KEY:
         return Response({'error': 'Token de dispositivo inválido'}, status=status.HTTP_403_FORBIDDEN)
 
     # 2. Extraer datos
