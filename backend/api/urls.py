@@ -1,5 +1,5 @@
 # backend/api/urls.py
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import views_admin
@@ -31,5 +31,5 @@ urlpatterns = [
     path('dashboard/stats/', views.dashboard_stats, name='dashboard-stats'),
 
     # URL para ingesta de datos IoT (Wemos)
-    path('iot/wemos/ingest/', views.recibir_datos_wemos, name='wemos-ingest'),
+    re_path(r'^iot/ingest/?$', views.recibir_datos_wemos, name='iot-ingest'),
 ]
