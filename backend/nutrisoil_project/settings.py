@@ -86,6 +86,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Si usan Vite
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
+    "https://nutrisoil-iot.onrender.com",
 ]
 
 CORS_ALLOW_HEADERS = [
