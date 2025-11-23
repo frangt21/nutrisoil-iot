@@ -14,7 +14,7 @@ import {
 
 const USE_MOCK = false;  // ← true = datos dummy, false = backend real
 
-const BACKEND_URL = 'http://localhost:8000';  // URL del backend
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;  // URL del backend
 
 // ═══════════════════════════════════════════════════════
 
