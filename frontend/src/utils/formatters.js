@@ -15,23 +15,49 @@ export const formatNumber = (num, decimalPlaces = 1) => {
 };
 
 /**
- * Valida un RUT chileno.
- * @param {string} rut - El RUT a validar.
+ * Valida un RUT chileno. Acepta formatos con o sin puntos y con guion.
+ * @param {string} rut - El RUT a validar (ej: "12.345.678-9" o "12345678-9").
  * @returns {boolean} - true si el RUT es válido, false en caso contrario.
  */
 export const validateRut = (rut) => {
-  if (!/^[0-9]+[-|‐]{1}[0-9kK]{1}$/.test(rut)) {
+  if (typeof rut !== 'string') {
     return false;
   }
-  const tmp = rut.split('-');
-  let digv = tmp[1];
-  let rutBody = tmp[0];
 
-  if (digv === 'K') digv = 'k';
+  // Limpiar el RUT: quitar puntos y el guion
+  const rutLimpio = rut.replace(/\./g, '').replace('-', '');
 
-  let M = 0;
-  let S = 1;
-  for (; rutBody; S = (S + rutBody % 10 * (9 - M++ % 6)) % 11, rutBody = Math.floor(rutBody / 10));
+  // Separar el cuerpo del dígito verificador
+  const cuerpo = rutLimpio.slice(0, -1);
+  let dv = rutLimpio.slice(-1).toUpperCase();
 
-  return (S ? S - 1 : 'k') === digv;
+  // Validar que el cuerpo sea numérico y el dv sea válido
+  if (!/^[0-9]+$/.test(cuerpo)) {
+    return false;
+  }
+
+  // --- Algoritmo Módulo 11 ---
+  let suma = 0;
+  let multiplo = 2;
+
+  // Recorrer el cuerpo del RUT de derecha a izquierda
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    suma += parseInt(cuerpo.charAt(i), 10) * multiplo;
+    multiplo = multiplo === 7 ? 2 : multiplo + 1;
+  }
+
+  const dvEsperado = 11 - (suma % 11);
+
+  // Convertir el resultado a el dígito verificador esperado
+  let dvFinal;
+  if (dvEsperado === 11) {
+    dvFinal = '0';
+  } else if (dvEsperado === 10) {
+    dvFinal = 'K';
+  } else {
+    dvFinal = dvEsperado.toString();
+  }
+
+  // Comparar el dígito verificador calculado con el ingresado
+  return dvFinal === dv;
 };
