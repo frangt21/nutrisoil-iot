@@ -71,9 +71,36 @@ const AdminUsersPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Validación de RUT
         if (formData.rut && !validateRut(formData.rut)) {
             showToast('El RUT ingresado no es válido.', 'error');
             return;
+        }
+
+        // Validación de Contraseña (Solo al crear o si se está cambiando)
+        if (!editingUser || formData.password) {
+            const pwd = formData.password;
+            const minLength = 6;
+            const hasUpperCase = /[A-Z]/.test(pwd);
+            const hasLowerCase = /[a-z]/.test(pwd);
+            const hasNumbers = /\d/.test(pwd);
+
+            if (pwd.length < minLength) {
+                showToast('La contraseña debe tener al menos 6 caracteres.', 'error');
+                return;
+            }
+            if (!hasUpperCase) {
+                showToast('La contraseña debe tener al menos una letra mayúscula.', 'error');
+                return;
+            }
+            if (!hasLowerCase) {
+                showToast('La contraseña debe tener al menos una letra minúscula.', 'error');
+                return;
+            }
+            if (!hasNumbers) {
+                showToast('La contraseña debe tener al menos un número.', 'error');
+                return;
+            }
         }
 
         try {

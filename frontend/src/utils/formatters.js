@@ -24,23 +24,29 @@ export const validateRut = (rut) => {
     return false;
   }
 
-  // Limpiar el RUT: quitar puntos y el guion
-  const rutLimpio = rut.replace(/\./g, '').replace('-', '');
+  // 1. Limpiar el RUT: Dejar solo números y k/K
+  // Esto maneja puntos, guiones, espacios, etc.
+  const rutLimpio = rut.replace(/[^0-9kK]+/g, '').toUpperCase();
 
-  // Separar el cuerpo del dígito verificador
+  // 2. Validaciones básicas de longitud (mínimo cuerpo + dv)
+  if (rutLimpio.length < 2) {
+    return false;
+  }
+
+  // 3. Separar cuerpo y dígito verificador
   const cuerpo = rutLimpio.slice(0, -1);
-  let dv = rutLimpio.slice(-1).toUpperCase();
+  const dv = rutLimpio.slice(-1);
 
-  // Validar que el cuerpo sea numérico y el dv sea válido
+  // 4. Validar que el cuerpo sean solo números
+  // (Si había una K en el medio, rutLimpio la tiene, pero aquí fallará)
   if (!/^[0-9]+$/.test(cuerpo)) {
     return false;
   }
 
-  // --- Algoritmo Módulo 11 ---
+  // 5. Algoritmo Módulo 11
   let suma = 0;
   let multiplo = 2;
 
-  // Recorrer el cuerpo del RUT de derecha a izquierda
   for (let i = cuerpo.length - 1; i >= 0; i--) {
     suma += parseInt(cuerpo.charAt(i), 10) * multiplo;
     multiplo = multiplo === 7 ? 2 : multiplo + 1;
@@ -48,16 +54,14 @@ export const validateRut = (rut) => {
 
   const dvEsperado = 11 - (suma % 11);
 
-  // Convertir el resultado a el dígito verificador esperado
-  let dvFinal;
+  let dvCalculado;
   if (dvEsperado === 11) {
-    dvFinal = '0';
+    dvCalculado = '0';
   } else if (dvEsperado === 10) {
-    dvFinal = 'K';
+    dvCalculado = 'K';
   } else {
-    dvFinal = dvEsperado.toString();
+    dvCalculado = dvEsperado.toString();
   }
 
-  // Comparar el dígito verificador calculado con el ingresado
-  return dvFinal === dv;
+  return dvCalculado === dv;
 };
