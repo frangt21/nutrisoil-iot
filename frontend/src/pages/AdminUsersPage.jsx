@@ -71,6 +71,12 @@ const AdminUsersPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Validación de campos obligatorios
+        if (!formData.new_email || !formData.nombre || !formData.apellido || !formData.rut || !formData.empresa) {
+            showToast('Por favor, complete todos los campos obligatorios (Email, Nombre, Apellido, RUT, Empresa).', 'error');
+            return;
+        }
+
         // Validación de RUT
         if (formData.rut && !validateRut(formData.rut)) {
             showToast('El RUT ingresado no es válido.', 'error');
